@@ -7,7 +7,7 @@ import pandas as pd
 st.title('Blue Dot :blue[Sports] :)') 
 
 
-st.write('Hello')
+
 
 
 df = pd.DataFrame({
@@ -31,6 +31,15 @@ else:
 
 add_sidebar = st.sidebar.selectbox('Menu',('Place Bet','My Bets','My Bank','Test Env'))
 
-if add_sidebar == "Place Bet":
-  st.write('Ind')
+if add_sidebar == "Test Env":
+  df = pd.DataFrame({
+  'first column': [1, 2, 3, 4],
+  'second column': [10, 20, 30, 40]})
+
+df
+st.line_chart(df)
+if st.button('Click for TN'):
+     st.write('##These Nuts)'
+else:
+     st.write()
 
