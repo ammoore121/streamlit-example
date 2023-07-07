@@ -4,6 +4,6 @@ import streamlit as st
 
 st.title('Blue Dot :blue[Sports] :)') 
 
-st.write(app)
+
 st.write('Hello')
 
