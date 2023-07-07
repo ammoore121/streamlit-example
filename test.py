@@ -90,8 +90,11 @@ if add_sidebar == "Place Bet":
           df_MainLineOdds['siX_side']= df_MainLineOdds['siX'].str.get(2)
           df_MainLineOdds['scrapeDateUTC'] = datetime.datetime.utcnow().isoformat()
           # ISO 8601 format for scrapedate is easiest to read in csv
-          
+
+         st.write("df_MainLineOdds - the raw unedited scrape") 
           df_MainLineOdds
+
+
 
      else:
           st.write()
