@@ -1,2 +1,2 @@
 import streamlit
-streamlit.write('Hello World!')
+streamlit.write('Hello World')
