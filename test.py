@@ -137,7 +137,7 @@ if add_sidebar == "Place Bet":
           df_sb = df_sb.reset_index(drop=True)
           
           
-          df_sb
+     
           
           
           
@@ -266,7 +266,7 @@ if add_sidebar == "Place Bet":
           
           #Insert a BetID  (short uuid) for each row
           
-          bet_ids = [shortuuid.uuid() for _ in range(len(filtered_df))]
+          bet_ids = [uuid.uuid4() for _ in range(len(filtered_df))]
           filtered_df.insert(0,'BetID',bet_ids)
           
           
