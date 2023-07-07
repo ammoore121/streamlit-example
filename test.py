@@ -16,3 +16,5 @@ df = pd.DataFrame({
 })
 
 df
+
+st.chart(df)
