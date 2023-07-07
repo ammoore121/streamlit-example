@@ -34,7 +34,7 @@ else:
 
 if add_sidebar == "Place Bet":
      if st.button('Execute'):
-          url = "https://content.unabated.com/markets/game-odds/v_gameodds.json"
+        url = "https://content.unabated.com/markets/game-odds/v_gameodds.json"
           #Scrape MainLines from Unabated
 
           querystring = {"v":"23587068-b3e0-4152-99c1-b0bce9523702"}
@@ -95,5 +95,177 @@ if add_sidebar == "Place Bet":
           st.write("df_MainLineOdds - unedited Unabated")
           df_MainLineOdds
 
+          # Transforming the SportsBooks Reference Table
+          # #Removing columns for building purposes#Note a bunch of other sportsbooks exist but are not shown on webpage. 
+        df_sb = pd.DataFrame().assign(bookName=df_sportsbooks['name'],bookId=df_sportsbooks['id'],isActive=df_sportsbooks['isActive'],
+        statusId=df_sportsbooks['statusId'],modifiedDate=df_sportsbooks['modifiedOn'])
+
+
+        #Creating Binary flags 
+        df_sb['nyBook']= 0
+        df_sb['sharpBook']= 0
+
+
+        #store binary flag reference
+        df_nyBooks= pd.DataFrame(
+            {"bookName" : ["Caesars", "DraftKings", "FanDuel", "FanDuel - Delayed", "BetMGM", "PointsBet", "BetRivers", "WynnBet", "Resorts", "BallyBet"],
+            'nyBook': [1,1,1,1,1,1,1,1,1,1]
+            }
+        )
+        df_sharpBooks = pd.DataFrame(
+            {"bookName" :['Unabated','Pinnacle','Pinnacle - Delayed','Bookmaker','Prophet Exchange'],
+            'sharpBook': [1,1,1,1,1]
+            }
+        )
+
+        #Insert 1 if bookName matches the above
+        df_sb=df_sb.set_index('bookName')
+        df2 = df_nyBooks.set_index('bookName')
+        df_sb.update(df2)
+
+        df3=df_sharpBooks.set_index('bookName')
+        df_sb.update(df3)
+
+        #Move bookName back to a column
+        # Step 1: Reset the index
+        df_sb = df_sb.reset_index()
+
+        # Step 2: Rename the 'index' column to 'ID'
+        df_sb = df_sb.rename(columns={'index': 'ID'})
+
+        # Step 3: Assign a new continuous integer index
+        df_sb = df_sb.reset_index(drop=True)
+
+
+
+        # Now we create the Teams table. 
+
+
+        #slimming down df_teams
+        df_teams_refined = pd.DataFrame().assign(teamId=df_teams['id'],teamName=df_teams['name'],abbreviation=df_teams['abbreviation'],
+        eventId=df_teams['eventId'],sideId=df_teams['sideId'],leagueId=df_teams['leagueId'],divisionId=df_teams['divisionId'],
+        modifiedDate=df_teams['modifiedOn'])
+
+        df_teams_refined
+        #This is our Teams Table
+
+
+
+        #manipulate the odds data
+
+        #Define bet_type
+        bet_type = {
+            'bt1': 'Money_Line',
+            'bt2':'Spread',
+            'bt3': 'Total_Combined'}
+
+        # Insert the bet_type & create filtered_df
+        filtered_df = df_MainLineOdds[df_MainLineOdds['marketSourceId'].isin(df_sb['bookId'])].copy()
+        filtered_df.loc[:, 'bet_type'] = filtered_df['btX'].map(bet_type)
+
+        #Insert a league column
+        league_dict = {
+            '1':'NFL',
+            '2':'CFB',
+            '3':'NBA',
+            '4':'NCAAB',
+            '5':'MLB',
+            '6':'NHL',
+            '7':'WNBA'
+            }
+
+        filtered_df.loc[:,'league'] = filtered_df['lgX_league'].map(league_dict)
+
+        # Insert the TeamNames and side(home/away) for Teamid_0 and Teamid_1
+        # Merge the two dataframes on teamId
+        filtered_df = df_teams_refined.merge(filtered_df, left_on='teamId', right_on='Teamid_0')
+
+        # Rename the columns so they don't overwrite each other
+        filtered_df = filtered_df.rename(columns={'teamName':'TeamName_0', 'abbreviation':'TeamAbbrev_0','sideId':'sideId_team0'})
+
+        # Drop the now unnecessary merged columns column
+        filtered_df = filtered_df.drop(columns={'teamId','TeamAbbrev_0','eventId_x','leagueId','divisionId','modifiedDate'})
+
+
+        #repeat for Teamid_1
+        filtered_df = filtered_df.merge(df_teams_refined, left_on='Teamid_1', right_on='teamId')
+        filtered_df = filtered_df.rename(columns={'teamName':'TeamName_1', 'abbreviation':'TeamAbbrev_1','sideId':'sideId_team1'})
+        filtered_df = filtered_df.drop(columns=['teamId','TeamAbbrev_1','leagueId','divisionId','modifiedDate','eventId'])
+        filtered_df = filtered_df.rename(columns={'eventId_y' : 'eventId'})
+
+
+
+        # Merge bookName into df_filtered
+        filtered_df = filtered_df.merge(df_sb, left_on='marketSourceId', right_on='bookId')
+
+        # Drop & rename columns. 
+
+        filtered_df= filtered_df.drop(columns=['statusId','siX'])
+
+        # Rename Columns 
+
+        filtered_df= filtered_df.rename(columns={
+            'isActive':'bookIsActive',
+            'siX_side': 'bet_side'})
+
+
+        #Insert betPeriod column
+
+        ptX_definiton = {
+            '1':'FullGame',
+            '2':'Half_1',
+            '3':'Half_2',
+            '4':'Quarter_1',
+            '5':'Quarter_2',
+            '6':'Quarter_3',
+            '7':'Quarter_4',
+            '8':'Period_1',
+            '9':'Period_2',
+            '10':'Period_3'}
+
+
+        filtered_df.loc[:, 'betPeriod'] = filtered_df['lgX_pt'].map(ptX_definiton)
+
+
+
+        #Reorder to make it easier to read
+
+        easiest_to_read_column_order = ['marketLineId','eventId', 'eventStart', 'eventEnd', 'modifiedDate', 'scrapeDateUTC', 'Teamid_0', 'TeamName_0', 'sideId_team0', 
+        'Teamid_1', 'TeamName_1','sideId_team1', 'bet_side','lgX', 'lgX_league','league', 'lgX_pt','betPeriod', 'bet_stage',   
+        'marketId', 'btX', 'bet_type', 'points', 'american_price', 
+        'price', 'sourcePrice', 'ImpliedProb%','marketSourceId', 'bookName', 'bookId', 'bookIsActive', 'nyBook', 'sharpBook']
+
+        filtered_df= filtered_df.reindex(columns=easiest_to_read_column_order)
+
+        #bet_side as interger
+        filtered_df["bet_side"] = filtered_df["bet_side"].astype(int)
+
+
+
+
+
+
+
+
+
+        #remove games which occurred in the past. 
+        filtered_df['eventStart'] = pd.to_datetime(filtered_df['eventStart'])
+        filtered_df['scrapeDateUTC'] = pd.to_datetime(filtered_df['scrapeDateUTC'])
+
+        # Create boolean mask
+        mask = filtered_df["eventStart"] >= filtered_df["scrapeDateUTC"]
+
+        filtered_df=filtered_df[mask]
+
+        #record the source of the bet
+        filtered_df['SourceName'] = "Unabated"
+
+
+        #Insert a BetID  (short uuid) for each row
+
+        bet_ids = [uuid.uuid4() for _ in range(len(filtered_df))]
+        filtered_df.insert(0,'BetID',bet_ids)
+ 
+        
      else:
           st.write()
