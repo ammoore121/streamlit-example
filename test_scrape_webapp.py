@@ -60,20 +60,20 @@ if add_sidebar == "Place Bet":
                         # Extract the americanPrice values from gameOddsMarketSourcesLines
                         game_odds_market_sources_lines = j['gameOddsMarketSourcesLines']
                         for market_source, market_data in game_odds_market_sources_lines.items():
-                        siX= market_source
-                        for bet_type, bet_data in market_data.items():
-                                american_price = bet_data['americanPrice']
-                                marketLineId= bet_data['marketLineId']
-                                marketId= bet_data['marketId']
-                                marketSourceId= bet_data['marketSourceId']
-                                points= bet_data['points']
-                                price= bet_data['price']
-                                sourcePrice= bet_data['sourcePrice']
-                                btX = bet_type
-                                # Store the extracted data in a tuple
-                                row = (i, j['eventId'],j['eventStart'],j['eventEnd'] ,id_0, id_1, siX, btX, marketLineId, marketSourceId,
-                                marketId, points,american_price, price, sourcePrice)
-                                data.append(row)
+                            siX= market_source
+                            for bet_type, bet_data in market_data.items():
+                                    american_price = bet_data['americanPrice']
+                                    marketLineId= bet_data['marketLineId']
+                                    marketId= bet_data['marketId']
+                                    marketSourceId= bet_data['marketSourceId']
+                                    points= bet_data['points']
+                                    price= bet_data['price']
+                                    sourcePrice= bet_data['sourcePrice']
+                                    btX = bet_type
+                                    # Store the extracted data in a tuple
+                                    row = (i, j['eventId'],j['eventStart'],j['eventEnd'] ,id_0, id_1, siX, btX, marketLineId, marketSourceId,
+                                    marketId, points,american_price, price, sourcePrice)
+                                    data.append(row)
                 except KeyError:
                     print("KeyError caught for event_teams:",event_teams)          
         # Create the DataFrame with the extracted data
