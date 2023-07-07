@@ -18,9 +18,6 @@ df = pd.DataFrame({
 add_sidebar = st.sidebar.selectbox('Menu',('Place Bet','My Bets','My Bank','Test Env'))
 
 if add_sidebar == "Test Env":
-  df = pd.DataFrame({
-  'first column': [1, 2, 3, 4],
-  'second column': [10, 20, 30, 40]})
   df
   st.line_chart(df)
   
