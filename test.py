@@ -29,4 +29,4 @@ else:
      st.write()
 
 
-add_sidebar = st.sidebar.selectbox('My Bets','Place Bet','Test Env')
+if add_sidebar = st.sidebar.selectbox('Menu',('Place Bet','My Bets','My Bank','Test Env'))
