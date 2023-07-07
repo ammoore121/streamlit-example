@@ -27,3 +27,6 @@ if st.button('See Table'):
      df
 else:
      st.write()
+
+
+add_sidebar = st.sidebar.selectbox('My Bets','Place Bet','Test Env')
