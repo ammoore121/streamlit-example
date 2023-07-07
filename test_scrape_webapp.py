@@ -136,7 +136,7 @@ if add_sidebar == "Place Bet":
         eventId=df_teams['eventId'],sideId=df_teams['sideId'],leagueId=df_teams['leagueId'],divisionId=df_teams['divisionId'],
         modifiedDate=df_teams['modifiedOn'])
 
-        df_teams_refined
+
         #This is our Teams Table
 
 
