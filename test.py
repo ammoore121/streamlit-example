@@ -31,6 +31,6 @@ else:
 
 add_sidebar = st.sidebar.selectbox('Menu',('Place Bet','My Bets','My Bank','Test Env'))
 
-if add_sidebar == "Place Bet"
+if add_sidebar == "Place Bet":
   st.write('Ind')
 
