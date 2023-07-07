@@ -5,7 +5,10 @@ import pandas as pd
 
 
 st.title('Blue Dot :blue[Sports] :)') 
-
+if st.button('See Table'):
+     df
+else:
+     st.write()
 
 df = pd.DataFrame({
   'first column': [1, 2, 3, 4],
@@ -21,7 +24,6 @@ if add_sidebar == "Test Env":
   df
   st.line_chart(df)
   
-  st.button('Click for TN')
-       st.write('##:red[These Nuts])'
+
 else:
   st.write()
