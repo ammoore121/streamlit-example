@@ -84,8 +84,7 @@ if add_sidebar == "Place Bet":
         df_MainLineOdds['siX_side']= df_MainLineOdds['siX'].str.get(2)
         df_MainLineOdds['scrapeDateUTC'] = datetime.datetime.utcnow().isoformat()
         # ISO 8601 format for scrapedate is easiest to read in csv
-        st.write("df_MainLineOdds - unedited Unabated")
-        df_MainLineOdds
+        
         # Transforming the SportsBooks Reference Table
         # #Removing columns for building purposes#Note a bunch of other sportsbooks exist but are not shown on webpage. 
         df_sb = pd.DataFrame().assign(bookName=df_sportsbooks['name'],bookId=df_sportsbooks['id'],isActive=df_sportsbooks['isActive'],
@@ -256,6 +255,8 @@ if add_sidebar == "Place Bet":
 
         bet_ids = [uuid.uuid4() for _ in range(len(filtered_df))]
         filtered_df.insert(0,'BetID',bet_ids)
+
+        filtered_df
  
         
      else:
