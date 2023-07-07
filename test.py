@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import requests
 import datetime
-import shortuuid
 import numpy as np
 
 #the app will reflect save and commits
