@@ -21,7 +21,7 @@ if add_sidebar == "Test Env":
   df
   st.line_chart(df)
   
-  st.button('Click for TN'):
+  st.button('Click for TN')
        st.write('##:red[These Nuts])'
 else:
   st.write()
