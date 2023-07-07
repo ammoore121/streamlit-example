@@ -6,7 +6,7 @@ import pandas as pd
 
 st.title('Blue Dot :blue[Sports] :)') 
 if st.button('See TN'):
-     st.write("##:red[These Nuts]"
+     st.write("##:red[These Nuts]")
 else:
      st.write()
 
