@@ -36,10 +36,12 @@ if add_sidebar == "Test Env":
   'first column': [1, 2, 3, 4],
   'second column': [10, 20, 30, 40]})
 
-df
-st.line_chart(df)
-if st.button('Click for TN'):
-     st.write('##These Nuts)'
-else:
-     st.write()
+  df
+  st.line_chart(df)
+  if st.button('Click for TN'):
+       st.write('##These Nuts)'
+  else:
+       st.write()
 
+else:
+  st.write()
