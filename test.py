@@ -17,4 +17,4 @@ df = pd.DataFrame({
 
 df
 
-st.chart(df)
+st.line_chart(df)
