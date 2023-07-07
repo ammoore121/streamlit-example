@@ -257,7 +257,7 @@ if add_sidebar == "Place Bet":
         filtered_df.insert(0,'BetID',bet_ids)
 
         #Filtered_df is the raw unabated Odds. Save this
-        filtered_df
+        
 
         SingleBets=pd.DataFrame()
 
@@ -337,6 +337,7 @@ if add_sidebar == "Place Bet":
 
         SingleBets = create_same_bet_id(SingleBets)
 
+        st.write('SingleBets Table - this is from scraped from Unabated and put into master schema')
         SingleBets
  
         
