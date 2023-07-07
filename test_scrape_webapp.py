@@ -256,7 +256,88 @@ if add_sidebar == "Place Bet":
         bet_ids = [uuid.uuid4() for _ in range(len(filtered_df))]
         filtered_df.insert(0,'BetID',bet_ids)
 
+        #Filtered_df is the raw unabated Odds. Save this
         filtered_df
+
+        SingleBets=pd.DataFrame()
+
+        #rename columns to match master
+        filtered_df = filtered_df.rename(columns={'TeamName_0':'AwayTeam','TeamName_1':'HomeTeam'})
+
+
+        #change values of bet_side to reflect HomeTeam vs AwayTeam
+        filtered_df['bet_side'] = filtered_df['bet_side'].replace({1: 'Home', 0: 'Away'})
+
+
+        #remove bets with no american_price
+        filtered_df= filtered_df.loc[filtered_df['american_price'] != 0]
+
+
+        #input 0s for null values in points field (needed to ID tagging)
+        filtered_df['points'] = filtered_df['points'].fillna(0)
+
+        #rename eventStart to eventStartUTC
+        filtered_df = filtered_df.rename(columns={'eventStart':'eventStartUTC'})
+
+
+        SingleBets_append = filtered_df.loc[:,['BetID','eventId', 'eventStartUTC','scrapeDateUTC','bet_stage', 
+                                        'league','AwayTeam','HomeTeam', 'bet_side',
+                                        'betPeriod','bet_type','points', 'american_price',
+                                        'bookName','nyBook','sharpBook', 'SourceName']]
+
+
+
+
+        #add to single bets
+        SingleBets = pd.concat([SingleBets,SingleBets_append], ignore_index=True)
+
+        #add the OverUnderId
+
+        def create_over_under_id(df):
+            df['overUnderId'] = df['eventId'].astype(str) + df['eventStartUTC'].astype(str) + df['scrapeDateUTC'].astype(str) + \
+                                df['bet_stage'] + df['HomeTeam'] + df['AwayTeam'] + df['league'] + df['betPeriod'] + \
+                                df['bet_type'] +np.abs(df['points']).astype(str) + df['bookName'] + df['SourceName']
+            return df
+
+        SingleBets = create_over_under_id(SingleBets)
+
+
+
+
+
+        # Check if there are only 2 records per overUnderId
+        grouped = SingleBets.groupby('overUnderId').size()
+
+        # Find groups with counts not equal to 2
+        non_two_groups = grouped[grouped != 2]
+
+        # Print non_two_groups
+        print("Groups with counts not equal to 2:")
+        print(non_two_groups)
+
+
+
+
+
+        # Create a boolean mask for rows with overUnderId that are NOT in non_two_groups (i.e. overUnderId values that have exactly two records)
+        mask = ~SingleBets['overUnderId'].isin(non_two_groups.index)
+
+        # Apply the mask to keep only the rows with the overUnderId that are NOT in non_two_groups
+        SingleBets = SingleBets[mask].reset_index(drop=True)
+
+
+
+
+        #Add short uuid for betgroup. This will identify all records where equivalent values except BetID bookname american_price. This is done code side. Will make calculations easier
+
+        def create_same_bet_id(df):
+            df['sameBetId'] = df['eventStartUTC'].astype(str) + df['bet_stage'] + df['league']+ df['HomeTeam'] + df['AwayTeam'] + df['betPeriod'] + \
+                                df['bet_type'] + np.abs(df['points']).astype(str) + df['bet_side'] 
+            return df
+
+        SingleBets = create_same_bet_id(SingleBets)
+
+        SingleBets
  
         
      else:
