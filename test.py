@@ -26,4 +26,4 @@ st.header('st.button')
 if st.button('See Table'):
      df
 else:
-     
+     st.write()
