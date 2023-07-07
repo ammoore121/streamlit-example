@@ -10,21 +10,23 @@ import uuid #note i have to use uuid here instead of shortuuid
 
 
 st.title('Blue Dot :blue[Sports] :)') 
-if st.button('See TN'):
-     st.write("##:red[These Nuts]")
-else:
-     st.write()
 
-df = pd.DataFrame({
-  'first column': [1, 2, 3, 4],
-  'second column': [10, 20, 30, 40]
-})
+
+
 
 add_sidebar = st.sidebar.selectbox('Menu',('Place Bet','My Bets','My Bank','Test Env'))
 
 if add_sidebar == "Test Env":
+  df = pd.DataFrame({
+  'first column': [1, 2, 3, 4],
+  'second column': [10, 20, 30, 40]
+})
   df
   st.line_chart(df)
+  if st.button('See TN'):
+     st.write("##:red[These Nuts]")
+  else:
+     st.write()
   
 else:
   st.write()
