@@ -554,17 +554,17 @@ if add_sidebar == "Place Bet":
         #Limit bets to NY books
 
         NYoutput_df = Calculations_df[Calculations_df['nyBook']==1]
-        
-        
+
+
         #Add an index to later input bets taken 
         NYoutput_df['inputIndex'] = range(1,len(NYoutput_df)+1)
-        
+
         # #Record the physical location the bet was placed
         # NYoutput_df['PlacedIn'] = 'NY'
-        
+
         #select columns to display
-        NYoutput_df[['inputIndex','eventStartUTC','league','AwayTeam','HomeTeam','bet_type','betPeriod', 'bookName', 'bet_side'
+        NYoutput_df1 = NYoutput_df[['inputIndex','eventStartUTC','league','AwayTeam','HomeTeam','bet_type','betPeriod', 'bookName', 'bet_side'
                     ,'points','american_price','expected_val','betSize_k50','betSize_k25','betSize_k15']].head(60)
-        
+        NYoutput_df1
      else:
           st.write()
