@@ -564,7 +564,8 @@ if add_sidebar == "Place Bet":
 
         #select columns to display
         NYoutput_df1 = NYoutput_df[['inputIndex','eventStartUTC','league','AwayTeam','HomeTeam','bet_type','betPeriod', 'bookName', 'bet_side'
-                    ,'points','american_price','expected_val','betSize_k50','betSize_k25','betSize_k15']].head(60)
-        NYoutput_df1
+                    ,'points','american_price','expected_val','betSize_k25',]].head(60)
+        st.table(NYoutput_df1)
+        st.dataframe(NYoutput_df1)
      else:
           st.write()
