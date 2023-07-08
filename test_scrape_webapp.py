@@ -518,7 +518,7 @@ if add_sidebar == "Place Bet":
         'imp_prob_1': 'imp_prob',
         'no_vig_1': 'no_vig',
         'agg_prob_1': 'agg_prob',
-        'expected_val_1': 'expected_val%',
+        'expected_val_1': 'expected_val',
         'kelly_ratio_1': 'kelly_ratio',
         'betSize_k75_1': 'betSize_k75',
         'betSize_k50_1': 'betSize_k50',
