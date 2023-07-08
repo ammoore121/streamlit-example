@@ -34,7 +34,7 @@ else:
 
 if add_sidebar == "Place Bet":
      
-     accountBalance = st.number_input('Insert Account Balance',value=)
+     accountBalance = st.number_input('Insert Account Balance',value=5000)
      username = 'amoore'
      if st.button('Execute'):
         url = "https://content.unabated.com/markets/game-odds/v_gameodds.json"
