@@ -338,9 +338,7 @@ if add_sidebar == "Place Bet":
             return df
 
         SingleBets = create_same_bet_id(SingleBets)
-
-        st.write('SingleBets Table - this is from scraped from Unabated and put into master schema')
-        SingleBets
+        
 
         #Get data ready for calculation input 
         #Group and Update Over/Under record into 1 row
@@ -549,6 +547,7 @@ if add_sidebar == "Place Bet":
         Calculations_df.sort_values(by='expected_val', ascending=False, inplace=True)
 
         Calculations_df=Calculations_df.copy()
+        st.write("Calculations_df- this is the full calculated data")
         Calculations_df
 
         #Limit bets to NY books
@@ -565,7 +564,7 @@ if add_sidebar == "Place Bet":
         #select columns to display
         NYoutput_df1 = NYoutput_df[['inputIndex','eventStartUTC','league','AwayTeam','HomeTeam','bet_type','betPeriod', 'bookName', 'bet_side'
                     ,'points','american_price','expected_val','betSize_k25',]].head(60)
-        st.table(NYoutput_df1)
+        st.write("NY state bets filtered by EV")
         st.dataframe(NYoutput_df1)
      else:
           st.write()
