@@ -339,7 +339,215 @@ if add_sidebar == "Place Bet":
 
         st.write('SingleBets Table - this is from scraped from Unabated and put into master schema')
         SingleBets
- 
+
+        #Get data ready for calculation input 
+        #Group and Update Over/Under record into 1 row
+        def group_and_update(df):
+            group_cols = ['eventId', 'eventStartUTC','scrapeDateUTC','bet_stage',
+            'HomeTeam', 'AwayTeam', 'league','betPeriod','bet_type','bookName','nyBook','sharpBook','SourceName','overUnderId']
+            df0 = df.loc[df.bet_side == 'Home'].set_index(group_cols)
+            df1 = df.loc[df.bet_side == 'Away'].set_index(group_cols)
+            cols_to_rename = set(df1.columns) - set(group_cols)
+            df1 = df1.rename(columns={col: col + "_2" for col in cols_to_rename})
+            df0 = df0.join(df1)
+            df0 = df0.reset_index()
+            return df0
+
+        #combined Rows (MasterData)
+        calc_ready_df=group_and_update(SingleBets)
+
+
+
+
+        # Define and Calulate metrics
+
+        # American odds payout function
+        ## takes in american odds and calculates the profit from the payout
+        def calc_profit(american_odds):
+            return american_odds / 100 if american_odds > 0  else 1 / ((-1 * american_odds) / 100)
+
+        # Implied probability calculation
+        ## takes in american odds and calculates an implied probability for 1 side
+        def implied_prob(american_odds):
+            return 100 / (american_odds + 100) if american_odds > 0 else (-1 * american_odds) / (-1 * american_odds + 100)
+
+        # No-vig calculation
+        def calc_no_vig(df, imp_prob_col_1, imp_prob_col_2):
+            no_vig_1 = df[imp_prob_col_1].values / (df[imp_prob_col_1].values + df[imp_prob_col_2].values)
+            no_vig_2 = df[imp_prob_col_2].values / (df[imp_prob_col_1].values + df[imp_prob_col_2].values)
+            df['no_vig_1'] = no_vig_1
+            df['no_vig_2'] = no_vig_2
+            return df
+
+
+
+
+
+
+
+        # Aggregate probability calculation
+        def calc_agg_probability(df, novig_col_1, novig_col_2, groupby_cols):
+            avg_prob = df.groupby(groupby_cols, as_index=False).agg({novig_col_1: 'mean', novig_col_2: 'mean'})
+            avg_prob = avg_prob.rename(columns={novig_col_1: 'agg_prob_1', novig_col_2: 'agg_prob_2'})
+            df = df.merge(avg_prob, on=groupby_cols, how='inner')
+            return df
+
+        def calc_expected_value(df):
+            df['expected_val_1'] = (df['agg_prob_1'] * calc_profit(df['american_price'])) - (1 - df['agg_prob_1'])
+            df['expected_val_2'] = (df['agg_prob_2'] * calc_profit(df['american_price_2'])) - (1 - df['agg_prob_2'])
+            return df
+
+        def calc_kelly_ratio(df):
+            df['kelly_ratio_1'] = df['agg_prob_1'] - (1 - df['agg_prob_1']) / calc_profit(df['american_price'])
+            df['kelly_ratio_2'] = df['agg_prob_2'] - (1 - df['agg_prob_2']) / calc_profit(df['american_price_2'])
+            return df
+
+        # Select output data and Drop NAs
+        output_df = calc_ready_df.query('bet_stage == "pregame"').filter(['BetID','BetID_2','eventId', 'eventStartUTC','scrapeDateUTC','league' ,
+        'HomeTeam', 'AwayTeam','bet_type', 'betPeriod', 'bookName','nyBook','SourceName', 'bet_side','points', 'american_price', 'overUnderId',  
+        'sameBetId','sameBetId_2','bet_side_2','points_2', 'american_price_2'],axis=1).dropna(subset=['american_price', 'american_price_2'])
+
+        # Implied probability
+        output_df['imp_prob_1'] = output_df['american_price'].apply(implied_prob)
+        output_df['imp_prob_2'] = output_df['american_price_2'].apply(implied_prob)
+        # No-vig
+        output_df = calc_no_vig(output_df, 'imp_prob_1', 'imp_prob_2')
+        # Avg probability
+        output_df = calc_agg_probability(output_df, 'no_vig_1', 'no_vig_2', ['eventId', 'bet_type', 'betPeriod', 'points'])
+        # Expected value
+        output_df = output_df.apply(calc_expected_value, axis=1)
+        # Kelly ratio
+        output_df = output_df.apply(calc_kelly_ratio, axis=1)
+        # Sort dataframe by largest value between expected_val_1 and expected_val_2
+        output_df['temp_col'] = np.where(output_df['expected_val_1'] > output_df['expected_val_2'], output_df['expected_val_1'], output_df['expected_val_2'])
+        output_df = output_df.sort_values(by='temp_col', ascending=False)
+        output_df = output_df.drop('temp_col', axis=1)
+
+
+        # Kelly Allocations
+        #Create Kelly allocated betsizes
+
+        output_df['betSize_k75_1'] = (output_df['kelly_ratio_1']*.75) * accountBalance
+        output_df['betSize_k75_2'] = (output_df['kelly_ratio_2']*.75) * accountBalance
+
+        output_df['betSize_k50_1'] = (output_df['kelly_ratio_1']*.50) * accountBalance
+        output_df['betSize_k50_2'] = (output_df['kelly_ratio_2']*.50) * accountBalance
+
+        output_df['betSize_k25_1'] = (output_df['kelly_ratio_1']*.25) * accountBalance
+        output_df['betSize_k25_2'] = (output_df['kelly_ratio_2']*.25) * accountBalance
+
+        output_df['betSize_k15_1'] = (output_df['kelly_ratio_1']*.15) * accountBalance
+        output_df['betSize_k15_2'] = (output_df['kelly_ratio_2']*.15) * accountBalance
+
+
+        # Separate 1 row into 2 so we can filter by EV per unique bet
+
+        # I want to split the records and capture the individual settings odds in a new row with the same shared elements. 
+        # I want to standardize the field naming
+
+
+
+
+
+        # Split data frame into two based on section 1 and section 2 
+        df1 = output_df.copy()
+        df1 = df1[[
+        'BetID',
+        'eventId',
+        'eventStartUTC',
+        'scrapeDateUTC',
+        'league',
+        'HomeTeam',
+        'AwayTeam',
+        'bet_type',
+        'betPeriod',
+        'bookName',
+        'nyBook',
+        'bet_side',
+        'points',
+        'american_price',
+        'overUnderId',
+        'sameBetId',
+        'imp_prob_1',
+        'no_vig_1',
+        'agg_prob_1',
+        'expected_val_1',
+        'kelly_ratio_1',
+        'betSize_k75_1',
+        'betSize_k50_1',
+        'betSize_k25_1',
+        'betSize_k15_1',
+        'SourceName']]
+
+        df2= output_df.copy()
+        df2 = df2[[
+        'BetID_2',
+        'eventId',
+        'eventStartUTC',
+        'scrapeDateUTC',
+        'league',
+        'HomeTeam',
+        'AwayTeam',
+        'bet_type',
+        'betPeriod',
+        'bookName',
+        'nyBook',
+        'bet_side_2', 
+        'points_2',
+        'american_price_2',
+        'overUnderId',
+        'sameBetId_2',
+        'imp_prob_2',
+        'no_vig_2',
+        'agg_prob_2',
+        'expected_val_2',
+        'kelly_ratio_2',
+        'betSize_k75_2',
+        'betSize_k50_2',
+        'betSize_k25_2',
+        'betSize_k15_2',
+        'SourceName']]
+
+        # Rename columns in df1 and df2
+        df1.rename(columns={
+        'bet_side': 'bet_side',
+        'points': 'points',
+        'american_price': 'american_price',
+        'imp_prob_1': 'imp_prob',
+        'no_vig_1': 'no_vig',
+        'agg_prob_1': 'agg_prob',
+        'expected_val_1': 'expected_val',
+        'kelly_ratio_1': 'kelly_ratio',
+        'betSize_k75_1': 'betSize_k75',
+        'betSize_k50_1': 'betSize_k50',
+        'betSize_k25_1': 'betSize_k25',
+        'betSize_k15_1': 'betSize_k15'}, inplace=True)
+
+        df2.rename(columns={
+        'BetID_2':'BetID',
+        'bet_side_2': 'bet_side',
+        'points_2': 'points',
+        'american_price_2': 'american_price',
+        'sameBetId_2' : 'sameBetId',
+        'imp_prob_2': 'imp_prob',
+        'no_vig_2': 'no_vig',
+        'agg_prob_2': 'agg_prob',
+        'expected_val_2': 'expected_val',
+        'kelly_ratio_2': 'kelly_ratio',
+        'betSize_k75_2': 'betSize_k75',
+        'betSize_k50_2': 'betSize_k50',
+        'betSize_k25_2': 'betSize_k25',
+        'betSize_k15_2': 'betSize_k15'}, inplace=True)
+
+        #create new df_merged cocatinating both dfs vertically(rows)
+        Calculations_df = pd.concat([df1,df2], axis=0)
+
+
+        #filter by Largest->Smalled EV
+        Calculations_df.sort_values(by='expected_val', ascending=False, inplace=True)
+
+        Calculations_df=Calculations_df.copy()
+        Calculations_df
         
      else:
           st.write()
