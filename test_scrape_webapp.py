@@ -518,7 +518,7 @@ if add_sidebar == "Place Bet":
         'imp_prob_1': 'imp_prob',
         'no_vig_1': 'no_vig',
         'agg_prob_1': 'agg_prob',
-        'expected_val_1': 'expected_val',
+        'expected_val_1': 'expected_val%',
         'kelly_ratio_1': 'kelly_ratio',
         'betSize_k75_1': 'betSize_k75',
         'betSize_k50_1': 'betSize_k50',
@@ -534,7 +534,7 @@ if add_sidebar == "Place Bet":
         'imp_prob_2': 'imp_prob',
         'no_vig_2': 'no_vig',
         'agg_prob_2': 'agg_prob',
-        'expected_val_2': 'expected_val',
+        'expected_val_2': 'expected_val%',
         'kelly_ratio_2': 'kelly_ratio',
         'betSize_k75_2': 'betSize_k75',
         'betSize_k50_2': 'betSize_k50',
@@ -546,7 +546,8 @@ if add_sidebar == "Place Bet":
 
 
         #filter by Largest->Smalled EV
-        Calculations_df.sort_values(by='expected_val', ascending=False, inplace=True)
+        Calculations_df.sort_values(by='expected_val%', ascending=False, inplace=True)
+        Calculations_df['expected_val%'] =Calculations_df['expected_val%']*100
 
         Calculations_df=Calculations_df.copy()
         st.write("Calculations_df- this is the full calculated data")
