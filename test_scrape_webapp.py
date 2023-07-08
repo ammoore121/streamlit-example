@@ -4,6 +4,7 @@ import requests
 import datetime
 import numpy as np
 import uuid #note i have to use uuid here instead of shortuuid
+import matplotlib.pyplot as plt
 
 #the app will reflect save and commits
 
@@ -567,5 +568,19 @@ if add_sidebar == "Place Bet":
                     ,'points','american_price','expected_val','betSize_k25',]].head(60)
         st.write("NY state bets filtered by EV")
         st.dataframe(NYoutput_df1)
+        
+        #Chart Bet Group Sizes by sameBetId
+        # Group by sameBetId and count the size of each group
+        grouped_by_sameBetId = SingleBets.groupby('sameBetId').size()
+
+        # Plot the histogram
+
+        plt.hist(grouped_by_sameBetId, bins=range(1, grouped_by_sameBetId.max() + 2), align='left', rwidth=0.8)
+        plt.xlabel('Group Size')
+        plt.ylabel('# of bets with X number Groupsize')
+        plt.title('Bet Group Sizes by sameBetId')
+
+        st.pyplot(plt)
+
      else:
           st.write()
