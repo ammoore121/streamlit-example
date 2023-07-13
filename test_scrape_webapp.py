@@ -11,7 +11,7 @@ import uuid #note i have to use uuid here instead of shortuuid
 
 
 st.title('Blue Dot :blue[Sports] :)') 
-st.set_page_config(layout-'wide')
+st.set_page_config(layout='wide')
 
 
 
