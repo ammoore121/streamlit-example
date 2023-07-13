@@ -9,9 +9,9 @@ import uuid #note i have to use uuid here instead of shortuuid
 #the app will reflect save and commits
 
 
+st.set_page_config(page_title= "Blue Dot :blue[Sports] :)" ,layout="wide")
 
-st.title('Blue Dot :blue[Sports] :)') 
-st.set_page_config(layout="wide")
+
 
 
 
