@@ -87,7 +87,7 @@ if add_sidebar == "Place Bet":
         df_MainLineOdds['lgX_pt'] = df_MainLineOdds['lgX'].str.extract(r'pt([^:]+)')
         df_MainLineOdds['bet_stage'] = df_MainLineOdds['lgX'].apply(lambda x: x.split(':', 2)[2] if len(x.split(':', 2)) > 2 else np.nan)
         df_MainLineOdds['siX_side']= df_MainLineOdds['siX'].str.get(2)
-        df_MainLineOdds['scrapeDateUTC'] = datetime.datetime.utcnow().isoformat()
+        df_MainLineOdds['scrapeDateUTC'] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
         # ISO 8601 format for scrapedate is easiest to read in csv
         
         # Transforming the SportsBooks Reference Table
